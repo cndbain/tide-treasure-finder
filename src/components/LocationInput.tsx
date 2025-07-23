@@ -68,31 +68,75 @@ const LocationInput = ({ onLocationSelect, currentLocation }: LocationInputProps
     
     setIsLoading(true);
     try {
-      // Using a simple geocoding service
-      const response = await fetch(
-        `https://api.bigdatacloud.net/data/geocode-forward-client?query=${encodeURIComponent(locationInput)}&localityLanguage=en`
-      );
-      const data = await response.json();
+      // Try multiple geocoding approaches
+      let result = null;
       
-      if (data.results && data.results.length > 0) {
-        const result = data.results[0];
-        onLocationSelect(result.lat, result.lng, result.formattedAddress);
+      // First try: BigDataCloud (free tier with limits)
+      try {
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/geocode-forward-client?query=${encodeURIComponent(locationInput)}&localityLanguage=en`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.results && data.results.length > 0) {
+            result = {
+              lat: data.results[0].lat,
+              lng: data.results[0].lng,
+              name: data.results[0].formattedAddress
+            };
+          }
+        }
+      } catch (error) {
+        console.log("BigDataCloud API failed, trying alternative...");
+      }
+      
+      // Fallback: Try Nominatim (OpenStreetMap) - free and open source
+      if (!result) {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}&limit=1&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'TidePoolExplorer/1.0'
+              }
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.length > 0) {
+              const item = data[0];
+              result = {
+                lat: parseFloat(item.lat),
+                lng: parseFloat(item.lon),
+                name: item.display_name
+              };
+            }
+          }
+        } catch (error) {
+          console.log("Nominatim API also failed");
+        }
+      }
+      
+      if (result) {
+        onLocationSelect(result.lat, result.lng, result.name);
         toast({
           title: "Location found!",
-          description: `Found: ${result.formattedAddress}`,
+          description: `Found: ${result.name}`,
         });
         setLocationInput("");
       } else {
         toast({
           title: "Location not found",
-          description: "Please try a different search term.",
+          description: "Please try a different search term or check your spelling.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Search error",
-        description: "Could not search for location. Please try again.",
+        description: "Could not search for location. Please try again or use your current location.",
         variant: "destructive",
       });
     }
