@@ -16,11 +16,16 @@ interface TidePrediction {
   type: 'H' | 'L'; // High or Low tide
 }
 
-interface TideData {
+export interface TideData {
   date: string;
   minTide: number;
   maxTide: number;
   lowTides: Array<{
+    time: string;
+    height: number;
+    isDaylight: boolean;
+  }>;
+  highTides: Array<{
     time: string;
     height: number;
     isDaylight: boolean;
@@ -159,6 +164,7 @@ export const useTideData = () => {
           minTide: Infinity,
           maxTide: -Infinity,
           lowTides: [],
+          highTides: [],
           isGoodDay: false
         });
       }
@@ -169,9 +175,15 @@ export const useTideData = () => {
       dayData.minTide = Math.min(dayData.minTide, height);
       dayData.maxTide = Math.max(dayData.maxTide, height);
       
-      // Add low tides
+      // Add low and high tides
       if (type === 'L') {
         dayData.lowTides.push({
+          time,
+          height,
+          isDaylight: isDaylightHour(time)
+        });
+      } else if (type === 'H') {
+        dayData.highTides.push({
           time,
           height,
           isDaylight: isDaylightHour(time)

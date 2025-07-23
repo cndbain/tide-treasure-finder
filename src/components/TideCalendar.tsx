@@ -2,26 +2,16 @@ import { useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight, Waves } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-interface TideData {
-  date: string;
-  minTide: number;
-  maxTide: number;
-  lowTides: Array<{
-    time: string;
-    height: number;
-    isDaylight: boolean;
-  }>;
-  isGoodDay: boolean;
-}
+import { type TideData } from "@/hooks/useTideData";
 
 interface TideCalendarProps {
   tideData: TideData[];
   maxTideLevel: number;
   daylightOnly: boolean;
+  onDayClick: (tideData: TideData) => void;
 }
 
-const TideCalendar = ({ tideData, maxTideLevel, daylightOnly }: TideCalendarProps) => {
+const TideCalendar = ({ tideData, maxTideLevel, daylightOnly, onDayClick }: TideCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const getDaysInMonth = (date: Date) => {
@@ -135,13 +125,16 @@ const TideCalendar = ({ tideData, maxTideLevel, daylightOnly }: TideCalendarProp
             return (
               <div
                 key={dayInfo.date}
+                onClick={() => dayInfo.tideInfo && onDayClick(dayInfo.tideInfo)}
                 className={`
-                  p-2 h-12 rounded-lg border text-center relative transition-all duration-300
+                  p-2 h-12 rounded-lg border text-center relative transition-all duration-300 cursor-pointer
+                  ${dayInfo.tideInfo ? 'hover:scale-105' : ''}
                   ${isGoodDay 
-                    ? 'bg-gradient-tide border-accent text-accent-foreground shadow-gentle animate-tide-rise' 
+                    ? 'bg-gradient-tide border-accent text-accent-foreground shadow-gentle animate-tide-rise hover:shadow-ocean' 
                     : 'bg-card/30 border-border hover:bg-card/50'
                   }
                   ${isToday ? 'ring-2 ring-primary' : ''}
+                  ${dayInfo.tideInfo ? 'hover:ring-1 hover:ring-primary/50' : ''}
                 `}
               >
                 <div className="text-sm font-medium">{dayInfo.day}</div>
@@ -168,6 +161,10 @@ const TideCalendar = ({ tideData, maxTideLevel, daylightOnly }: TideCalendarProp
           <div className="flex items-center space-x-2">
             <Waves className="w-3 h-3 text-accent" />
             <span>Low tide day</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-primary">💡</span>
+            <span>Click any day for details</span>
           </div>
         </div>
       </div>

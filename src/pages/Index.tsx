@@ -3,19 +3,30 @@ import { Waves, Clock, MapPin } from "lucide-react";
 import LocationInput from "@/components/LocationInput";
 import TideFilters from "@/components/TideFilters";
 import TideCalendar from "@/components/TideCalendar";
-import { useTideData } from "@/hooks/useTideData";
+import TideDetail from "@/components/TideDetail";
+import { useTideData, type TideData } from "@/hooks/useTideData";
 import tidepoolHero from "@/assets/tide-pool-hero.jpg";
+
 
 const Index = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number; name: string } | undefined>();
   const [maxTideLevel, setMaxTideLevel] = useState(0);
   const [daylightOnly, setDaylightOnly] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<TideData | null>(null);
   
   const { tideData, isLoading, findNearbyStations } = useTideData();
 
   const handleLocationSelect = (lat: number, lng: number, name: string) => {
     setLocation({ lat, lng, name });
     findNearbyStations(lat, lng);
+  };
+
+  const handleDayClick = (tideData: TideData) => {
+    setSelectedDay(tideData);
+  };
+
+  const handleCloseTideDetail = () => {
+    setSelectedDay(null);
   };
 
   return (
@@ -100,6 +111,7 @@ const Index = () => {
               tideData={tideData}
               maxTideLevel={maxTideLevel}
               daylightOnly={daylightOnly}
+              onDayClick={handleDayClick}
             />
             
             {/* Location Info */}
@@ -140,6 +152,16 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Tide Detail Modal */}
+      {selectedDay && (
+        <TideDetail
+          selectedDay={selectedDay}
+          onClose={handleCloseTideDetail}
+          maxTideLevel={maxTideLevel}
+          daylightOnly={daylightOnly}
+        />
+      )}
     </div>
   );
 };
