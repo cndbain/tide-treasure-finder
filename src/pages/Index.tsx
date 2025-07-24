@@ -146,8 +146,8 @@ const Index = () => {
               <p>Many creatures are small and well-camouflaged</p>
             </div>
             <div>
-              <p className="font-medium mb-1">🤲 Gentle Touch</p>
-              <p>Look with your eyes, and if you must touch, be very gentle</p>
+              <p className="font-medium mb-1">🤲 Don't Touch</p>
+              <p>Look with your eyes and don't touch</p>
             </div>
           </div>
         </div>
