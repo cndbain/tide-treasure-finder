@@ -11,7 +11,7 @@ import tidepoolHero from "@/assets/tide-pool-hero.jpg";
 const Index = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number; name: string } | undefined>();
   const [maxTideLevel, setMaxTideLevel] = useState(0);
-  const [daylightOnly, setDaylightOnly] = useState(false);
+  const [daylightOnly, setDaylightOnly] = useState(true);
   const [selectedDay, setSelectedDay] = useState<TideData | null>(null);
   
   const { tideData, isLoading, findNearbyStations } = useTideData();
