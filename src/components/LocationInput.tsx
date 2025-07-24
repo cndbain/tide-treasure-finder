@@ -68,13 +68,17 @@ const LocationInput = ({ onLocationSelect, currentLocation }: LocationInputProps
     
     setIsLoading(true);
     try {
+      // Check if input is a 5-digit ZIP code
+      const isZipCode = /^\d{5}$/.test(locationInput.trim());
+      const searchQuery = isZipCode ? `${locationInput.trim()}, USA` : locationInput;
+      
       // Try multiple geocoding approaches
       let result = null;
       
       // First try: BigDataCloud (free tier with limits)
       try {
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/geocode-forward-client?query=${encodeURIComponent(locationInput)}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/geocode-forward-client?query=${encodeURIComponent(searchQuery)}&localityLanguage=en`
         );
         
         if (response.ok) {
@@ -95,7 +99,7 @@ const LocationInput = ({ onLocationSelect, currentLocation }: LocationInputProps
       if (!result) {
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}&limit=1&addressdetails=1`,
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&addressdetails=1`,
             {
               headers: {
                 'User-Agent': 'TidePoolExplorer/1.0'
