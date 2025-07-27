@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Waves, Clock, MapPin } from "lucide-react";
 import LocationInput from "@/components/LocationInput";
 import TideFilters from "@/components/TideFilters";
@@ -23,11 +23,29 @@ const Index = () => {
 
   const handleDayClick = (tideData: TideData) => {
     setSelectedDay(tideData);
+    // Push a new history state when opening the modal
+    window.history.pushState({ modal: 'tide-detail' }, '', window.location.href);
   };
 
   const handleCloseTideDetail = () => {
     setSelectedDay(null);
   };
+
+  // Handle browser back button to close modal
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (selectedDay) {
+        // If modal is open and back button is pressed, close it
+        setSelectedDay(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [selectedDay]);
 
   return (
     <div className="min-h-screen bg-gradient-surface">
